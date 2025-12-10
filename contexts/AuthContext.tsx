@@ -79,13 +79,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await firebaseAuth.register(email, password, fullName);
       
+      // Wait a moment for Firebase Auth to propagate
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Register student data in backend
-      await studentsApi.register({
+      const studentData = await studentsApi.register({
         fullName,
         major,
       });
       
-      // Student data will be fetched in onAuthStateChanged
+      // Set student data directly instead of waiting for onAuthStateChanged
+      setStudent(studentData);
+      setLoading(false);
     } catch (error) {
       setLoading(false);
       throw error;
