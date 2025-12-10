@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
     // Safety timeout - if auth doesn't initialize in 3 seconds, stop loading
@@ -33,6 +34,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
         clearTimeout(timeout);
         setUser(firebaseUser);
+        
+        // Skip fetching student data if we're in the middle of registration
+        if (isRegistering) {
+          setLoading(false);
+          return;
+        }
         
         if (firebaseUser) {
           // Fetch student data from backend
@@ -61,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
       return undefined;
     }
-  }, []);
+  }, [isRegistering]);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
@@ -76,6 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (email: string, password: string, fullName: string, major: string) => {
     setLoading(true);
+    setIsRegistering(true);
     try {
       await firebaseAuth.register(email, password, fullName);
       
@@ -91,8 +99,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Set student data directly instead of waiting for onAuthStateChanged
       setStudent(studentData);
       setLoading(false);
+      setIsRegistering(false);
     } catch (error) {
       setLoading(false);
+      setIsRegistering(false);
       throw error;
     }
   };
