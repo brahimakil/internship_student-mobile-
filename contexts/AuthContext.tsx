@@ -78,7 +78,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       await firebaseAuth.register(email, password, fullName);
-      // Student data will be created in backend on first API call
+      
+      // Register student data in backend
+      await studentsApi.register({
+        fullName,
+        major,
+      });
+      
+      // Student data will be fetched in onAuthStateChanged
     } catch (error) {
       setLoading(false);
       throw error;

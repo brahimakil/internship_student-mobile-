@@ -3,6 +3,9 @@ import { API_ENDPOINTS } from '@/constants/api';
 import { Student } from '@/types';
 
 export const studentsApi = {
+  register: (data: { fullName: string; major: string }) => 
+    apiClient.post<Student>(`${API_ENDPOINTS.STUDENTS}/register`, data),
+
   getById: (id: string) => apiClient.get<Student>(API_ENDPOINTS.STUDENT_BY_ID(id)),
   
   update: (id: string, data: Partial<Student>) => 
